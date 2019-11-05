@@ -1,13 +1,20 @@
+from typing import Callable, Dict, Iterable, Optional, Tuple
+
 import click
 
 from valohai_cli.help_texts import EXECUTION_COUNTER_HELP
 
 
-def _default_name_formatter(option):
+def _default_name_formatter(option: Dict[str, str]) -> str:
     return option['name']
 
 
-def prompt_from_list(options, prompt, nonlist_validator=None, name_formatter=_default_name_formatter):
+def prompt_from_list(
+    options: Iterable[dict],
+    prompt: str,
+    nonlist_validator: Optional[Callable] = None,
+    name_formatter: Callable = _default_name_formatter
+) -> dict:
     for i, option in enumerate(options, 1):
         click.echo('{number} {name} {description}'.format(
             number=click.style('[%3d]' % i, fg='cyan'),
@@ -34,7 +41,7 @@ def prompt_from_list(options, prompt, nonlist_validator=None, name_formatter=_de
 
 
 class HelpfulArgument(click.Argument):
-    def __init__(self, param_decls, **kwargs):
+    def __init__(self, param_decls: Tuple[str], **kwargs) -> None:
         self.help = kwargs.pop('help', None)
         super(HelpfulArgument, self).__init__(param_decls, **kwargs)
 
@@ -43,6 +50,6 @@ class HelpfulArgument(click.Argument):
             return (self.name, self.help)
 
 
-def counter_argument(fn):
+def counter_argument(fn: Callable) -> Callable:
     # Extra gymnastics needed because `click.arguments` mutates the kwargs here
     return click.argument('counter', help=EXECUTION_COUNTER_HELP, cls=HelpfulArgument)(fn)

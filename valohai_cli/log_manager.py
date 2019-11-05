@@ -1,21 +1,22 @@
 import hashlib
+from typing import Optional
 
 from valohai_cli.api import request
 from valohai_cli.utils import force_bytes
 
 
 class LogManager:
-    def __init__(self, execution):
+    def __init__(self, execution: dict) -> None:
         self.execution = execution
         self.execution_url = execution['url']
         self.events_url = execution['url'] + 'events/'
         self.seen_events = set()
 
-    def update_execution(self):
+    def update_execution(self) -> dict:
         self.execution = request('get', self.execution_url).json()
         return self.execution
 
-    def fetch_events(self, limit=None):
+    def fetch_events(self, limit: Optional[int] = None) -> dict:
         params = {}
         if limit is not None:
             params['limit'] = limit

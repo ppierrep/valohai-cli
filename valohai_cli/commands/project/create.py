@@ -7,7 +7,13 @@ from valohai_cli.messages import info, success
 from valohai_cli.utils import get_project_directory
 
 
-def create_project(directory, name, description='', link=True, yes=False):
+def create_project(
+    directory: str,
+    name: str,
+    description: str = '',
+    link: bool = True,
+    yes: bool = False
+) -> None:
     """
     Internal API for creating a project.
     """

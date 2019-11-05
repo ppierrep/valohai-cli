@@ -1,10 +1,11 @@
 import os
 import subprocess
+from typing import List
 
 from valohai_cli.exceptions import NoCommit, NoGitRepo
 
 
-def check_git_output(args, directory):
+def check_git_output(args: List[str], directory: str) -> bytes:
     try:
         return subprocess.check_output(
             args=args,
@@ -23,7 +24,7 @@ def check_git_output(args, directory):
         raise
 
 
-def get_current_commit(directory):
+def get_current_commit(directory: str) -> str:
     """
     (Try to) get the current commit of the Git working copy in `directory`.
     :param directory: Directory path.
@@ -33,7 +34,7 @@ def get_current_commit(directory):
     return check_git_output(['git', 'rev-parse', 'HEAD'], directory).strip().decode()
 
 
-def describe_current_commit(directory):
+def describe_current_commit(directory: str) -> str:
     """
     (Try to) describe the lineage and status of the Git working copy in `directory`.
     :param directory: Directory path.
@@ -43,7 +44,7 @@ def describe_current_commit(directory):
     return check_git_output(['git', 'describe', '--always', '--long', '--dirty', '--all'], directory).strip().decode()
 
 
-def get_file_at_commit(directory, commit, path):
+def get_file_at_commit(directory: str, commit: str, path: str) -> bytes:
     """
     Get the contents of repository `path` at commit `commit` given the
     Git working directory `directory`.
@@ -58,7 +59,7 @@ def get_file_at_commit(directory, commit, path):
     return check_git_output(args, directory)
 
 
-def expand_commit_id(directory, commit):
+def expand_commit_id(directory: str, commit: str) -> str:
     """
     Expand the possibly abbreviated (or otherwise referred to, i.e. "HEAD")
     commit ID, and verify it exists.

@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import Iterable, Optional
 
 import click
 import six
@@ -80,7 +81,13 @@ def pluck_printable_data(data, columns, col_formatter):
         yield [col_formatter(col_val) for col_val in (datum.get(column) for column in columns)]
 
 
-def print_table(data, columns=(), headers=None, format=None, **kwargs):
+def print_table(
+    data,
+    columns: Iterable[str] = (),
+    headers: Optional[Iterable[str]] = None,
+    format: Optional[str] = None,
+    **kwargs
+) -> None:
     if isinstance(data, dict) and not columns:
         data = [{'key': key, 'value': value} for (key, value) in sorted(data.items())]
         columns = ('key', 'value')

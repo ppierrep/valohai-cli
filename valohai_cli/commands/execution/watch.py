@@ -22,14 +22,14 @@ class WatchTUI:
         'complete': {'fg': 'green', 'bold': True},
     }
 
-    def __init__(self, execution):
+    def __init__(self, execution: dict) -> None:
         self.execution = execution
         self.log_manager = LogManager(execution)
         self.events = []
         self.n_events = 0
         self.status_text = None
 
-    def refresh(self):
+    def refresh(self) -> None:
         try:
             self.log_manager.update_execution()
             event_response = self.log_manager.fetch_events(limit=100)
@@ -42,7 +42,7 @@ class WatchTUI:
             self.events = self.events[-500:]  # Only keep the last 500 events
         self.draw()
 
-    def draw(self):
+    def draw(self) -> None:
         execution = self.log_manager.execution
         events = self.events
         l = Layout()
@@ -60,7 +60,7 @@ class WatchTUI:
         click.clear()
         l.draw()
 
-    def get_stat_flex(self, execution):
+    def get_stat_flex(self, execution: dict) -> Flex:
         stat_flex = Flex()
         stat_flex.add(
             'Status: {status}'.format(status=execution['status']),
@@ -71,7 +71,7 @@ class WatchTUI:
         stat_flex.add('{n} events'.format(n=self.n_events), align='right')
         return stat_flex
 
-    def get_header_flex(self, execution):
+    def get_header_flex(self, execution: dict) -> Flex:
         header_flex = Flex(style={'bg': 'blue', 'fg': 'white'})
         header_flex.add(
             content='({project}) #{counter}'.format(

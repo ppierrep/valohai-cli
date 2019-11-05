@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 import click
 
 from valohai_cli.api import request
@@ -13,7 +15,7 @@ class NewProjectInstead(Exception):
     pass
 
 
-def filter_projects(projects, spec):
+def filter_projects(projects: List[dict], spec: str) -> List[dict]:
     spec = str(spec).lower()
     return [
         project
@@ -22,7 +24,7 @@ def filter_projects(projects, spec):
     ]
 
 
-def choose_project(dir, spec=None):
+def choose_project(dir: str, spec: Optional[str] = None) -> Optional[dict]:
     """
     Choose a project, possibly interactively.
 
@@ -68,7 +70,7 @@ def choose_project(dir, spec=None):
 @click.command()
 @click.argument('project', default=None, required=False)
 @yes_option
-def link(project, yes):
+def link(project: str, yes: bool):
     """
     Link a directory with a Valohai project.
     """

@@ -1,12 +1,18 @@
+from typing import Any, Dict, Optional, Union
+
 import click
 
 from valohai_cli.exceptions import NoProject
 from valohai_cli.messages import success
+from valohai_cli.models.project import Project
+from valohai_cli.models.remote_project import RemoteProject
 from valohai_cli.settings import settings
 from valohai_cli.utils import get_project_directory
 
 
-def get_project(dir=None, require=False):
+def get_project(
+    dir: Optional[str] = None, require: bool = False
+) -> Optional[Union[Project, RemoteProject]]:
     """
     Get the Valohai project object for a directory context.
 
@@ -24,10 +30,16 @@ def get_project(dir=None, require=False):
     return project
 
 
-def set_project_link(dir, project, inform=False):
+def set_project_link(
+    dir: str,
+    project: Dict[str, Any],
+    inform: bool = False,
+) -> None:
     settings.set_project_link(dir, project)
     if inform:
-        success('Linked {dir} to {name}.'.format(
-            dir=click.style(dir, bold=True),
-            name=click.style(project['name'], bold=True)
-        ))
+        success(
+            'Linked {dir} to {name}.'.format(
+                dir=click.style(dir, bold=True),
+                name=click.style(project['name'], bold=True),
+            )
+        )

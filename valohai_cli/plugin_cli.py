@@ -1,8 +1,11 @@
 import pkgutil
 from collections import defaultdict
 from importlib import import_module
+from typing import Iterator, List, Optional, Tuple
 
 import click
+from click.core import Command, Context
+from click.formatting import HelpFormatter
 
 from valohai_cli.utils import cached_property, match_prefix
 
@@ -13,7 +16,7 @@ class PluginCLI(click.MultiCommand):
         'start': 'run',
     }
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self._commands_module = kwargs.pop('commands_module')
         self.aliases = dict(self.aliases, **kwargs.get('aliases', {}))  # instance level copy
         super(PluginCLI, self).__init__(**kwargs)
@@ -36,10 +39,10 @@ class PluginCLI(click.MultiCommand):
                 command_map[alias_from] = command_map.get(alias_to, alias_to)  # resolve aliases
         return command_map
 
-    def list_commands(self, ctx):
+    def list_commands(self, ctx: Optional[Context]) -> List[str]:
         return self.command_modules
 
-    def get_command(self, ctx, name):
+    def get_command(self, ctx: Optional[Context], name: str) -> Optional[Command]:
         # Dashes aren't valid in Python identifiers, so let's just replace them here.
         name = name.replace('-', '_')
 
@@ -72,15 +75,15 @@ class PluginCLI(click.MultiCommand):
             ))
             return None
 
-    def resolve_command(self, ctx, args):
+    def resolve_command(self, ctx: Context, args: List[str]) -> Tuple[str, Command, list]:
         cmd_name, cmd, rest_args = super(PluginCLI, self).resolve_command(ctx, args)
         return (cmd.name, cmd, rest_args)  # Always use the canonical name of the command
 
-    def _get_command(self, name):
+    def _get_command(self, name: str) -> Command:
         module = import_module('%s.%s' % (self.commands_module.__name__, name))
         return getattr(module, name)
 
-    def _get_all_commands(self, ctx):
+    def _get_all_commands(self, ctx: Context) -> Iterator[Tuple[str, Command]]:
         def walk_commands(multicommand, name_trail=()):
             for subcommand in multicommand.list_commands(ctx):
                 cmd = multicommand.get_command(ctx, subcommand)
@@ -97,7 +100,7 @@ class PluginCLI(click.MultiCommand):
 
 class RecursiveHelpPluginCLI(PluginCLI):
 
-    def format_commands(self, ctx, formatter):
+    def format_commands(self, ctx: Context, formatter: HelpFormatter) -> None:
         rows_by_prefix = defaultdict(list)
         for trail, command in self._get_all_commands(ctx):
             prefix = (' '.join(trail[:1]) if len(trail) > 1 else '')

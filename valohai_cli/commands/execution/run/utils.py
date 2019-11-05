@@ -1,10 +1,11 @@
 import click
 from click import BadParameter
+from valohai_yaml.objs.config import Config
 
 from valohai_cli.utils import match_prefix
 
 
-def match_step(config, step):
+def match_step(config: Config, step: str) -> str:
     if step in config.steps:
         return step
     step_matches = match_prefix(config.steps, step, return_unique=False)

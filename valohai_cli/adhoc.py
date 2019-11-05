@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import click
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
@@ -7,12 +8,13 @@ from valohai_cli.api import request
 from valohai_cli.exceptions import APIError, NoCommit, NoGitRepo
 from valohai_cli.git import describe_current_commit
 from valohai_cli.messages import success, warn
+from valohai_cli.models.project import Project
 from valohai_cli.packager import package_directory
 from valohai_cli.utils.file_size_format import filesizeformat
 from valohai_cli.utils.hashing import get_fp_sha256
 
 
-def package_adhoc_commit(project, validate=True):
+def package_adhoc_commit(project: Project, validate: bool = True) -> dict:
     """
     Create an ad-hoc tarball and commit of the project directory.
 
@@ -50,7 +52,7 @@ def package_adhoc_commit(project, validate=True):
 create_adhoc_commit = package_adhoc_commit
 
 
-def create_adhoc_commit_from_tarball(project, tarball, description=''):
+def create_adhoc_commit_from_tarball(project: Project, tarball: str, description: str = '') -> dict:
     """
     Using a precreated ad-hoc tarball, create or retrieve an ad-hoc commit of it on the Valohai host.
 
@@ -71,7 +73,7 @@ def create_adhoc_commit_from_tarball(project, tarball, description=''):
     return commit_obj
 
 
-def _get_pre_existing_commit(tarball):
+def _get_pre_existing_commit(tarball: str) -> Optional[dict]:
     try:
         # This is the same mechanism used by the server to
         # calculate the identifier for an ad-hoc tarball.
@@ -86,7 +88,7 @@ def _get_pre_existing_commit(tarball):
         return None
 
 
-def _upload_commit_code(project, tarball, description=''):
+def _upload_commit_code(project: Project, tarball: str, description: str = '') -> dict:
     size = os.stat(tarball).st_size
     click.echo('Uploading {size}...'.format(size=filesizeformat(size)))
     with open(tarball, 'rb') as tarball_fp:

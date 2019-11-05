@@ -9,7 +9,7 @@ from valohai_cli.messages import success, warn
 from valohai_cli.utils import get_project_directory
 
 
-def validate_file(filename):
+def validate_file(filename: str) -> int:
     """
     Validate `filename`, print its errors, and return the number of errors.
 

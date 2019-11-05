@@ -1,8 +1,10 @@
 import os
+from typing import IO, List, Optional, Union
 
 import six
 import valohai_yaml
 from click import BadParameter
+from valohai_yaml.objs.config import Config
 
 from valohai_cli.api import request
 from valohai_cli.exceptions import APIError, InvalidConfig, NoExecution
@@ -12,15 +14,20 @@ from valohai_cli.git import get_file_at_commit
 class Project:
     is_remote = False
 
-    def __init__(self, data, directory=None):
+    def __init__(self, data: dict, directory: Optional[str] = None) -> None:
         self.data = data
         self.directory = directory
         self._commit_list = None
 
-    id = property(lambda p: p.data['id'])
-    name = property(lambda p: p.data['name'])
+    @property
+    def id(self) -> str:
+        return self.data['id']
 
-    def get_config(self, commit_identifier=None):
+    @property
+    def name(self) -> str:
+        return self.data['name']
+
+    def get_config(self, commit_identifier: Optional[str] = None) -> Config:
         """
         Get the `valohai_yaml.Config` object from the current working directory,
         or a given commit.
@@ -40,7 +47,7 @@ class Project:
             config_sio = six.StringIO(config_bytes.decode('utf-8'))
             return self._parse_config(config_sio, filename)
 
-    def _parse_config(self, config_fp, filename='<config file>'):
+    def _parse_config(self, config_fp: Union[IO, list, str], filename: str = '<config file>') -> Config:
         try:
             config = valohai_yaml.parse(config_fp)
             config.project = self
@@ -53,10 +60,10 @@ class Project:
                 n=len(ves.errors),
             ))
 
-    def get_config_filename(self):
+    def get_config_filename(self) -> str:
         return os.path.join(self.directory, 'valohai.yaml')
 
-    def get_execution_from_counter(self, counter, params=None):
+    def get_execution_from_counter(self, counter: Union[str, int], params: Optional[dict] = None) -> dict:
         if isinstance(counter, str):
             counter = counter.lstrip('#')
             if not (counter.isdigit() or counter == 'latest'):
@@ -74,7 +81,7 @@ class Project:
                 raise NoExecution('Execution #{counter} does not exist'.format(counter=counter))
             raise
 
-    def load_commit_list(self):
+    def load_commit_list(self) -> List[dict]:
         """
         Get a list of non-adhoc commits, newest first.
         """
@@ -92,7 +99,7 @@ class Project:
             self._commit_list = commits
         return self._commit_list
 
-    def resolve_commit(self, commit_identifier=None):
+    def resolve_commit(self, commit_identifier: Optional[str] = None) -> dict:
         """
         Resolve a commit identifier to a commit dict.
         :param commit_identifier:
@@ -112,7 +119,7 @@ class Project:
         assert newest_commit['identifier']
         return newest_commit
 
-    def load_full_commit(self, identifier=None):
+    def load_full_commit(self, identifier: Optional[str] = None) -> dict:
         """
         Load the commit object including config data (as a dict) from the Valohai host for the given commit identifier.
 

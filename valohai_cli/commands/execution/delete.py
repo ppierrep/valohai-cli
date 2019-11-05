@@ -6,6 +6,7 @@ from valohai_cli.api import request
 from valohai_cli.ctx import get_project
 from valohai_cli.exceptions import APIError
 from valohai_cli.messages import progress, success, warn
+from valohai_cli.models.project import Project
 from valohai_cli.range import IntegerRange
 
 
@@ -30,7 +31,7 @@ def delete(counters, purge_outputs=False):
         sys.exit(1)
 
 
-def delete_execution(project, counter, purge_outputs=False):
+def delete_execution(project: Project, counter: int, purge_outputs: bool = False) -> bool:
     execution_url = '/api/v0/executions/{project_id}:{counter}/'.format(project_id=project.id, counter=counter)
     try:
         execution = request('get', execution_url).json()

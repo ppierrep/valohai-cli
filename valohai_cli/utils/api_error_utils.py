@@ -1,9 +1,10 @@
 import re
+from typing import Callable, Optional, Union
 
-# See Roi for type hints for these functions.
+StringOrPattern = Union[str, re.Pattern]
 
 
-def _match_string(str, pattern):
+def _match_string(str: Optional[str], pattern: StringOrPattern) -> bool:
     if str is None:
         return False
     if isinstance(pattern, re.Pattern):
@@ -12,11 +13,12 @@ def _match_string(str, pattern):
 
 
 def match_error(
-    response_data,
-    code=None,
-    message=None,
-    matcher=None,
-):
+    response_data: dict,
+    *,
+    code: Optional[StringOrPattern] = None,
+    message: Optional[StringOrPattern] = None,
+    matcher: Optional[Callable] = None,
+) -> Optional[dict]:
     if code and not _match_string(response_data.get('code'), code):
         return None
     if message and not _match_string(response_data.get('message'), message):
@@ -26,11 +28,12 @@ def match_error(
     return response_data
 
 
-def find_error(
-    response_data,
-    code=None,
-    message=None,
-    matcher=None,
+def _find_error(
+    response_data: Union[str, dict, list],
+    *,
+    code: Optional[StringOrPattern] = None,
+    message: Optional[StringOrPattern] = None,
+    matcher: Optional[Callable] = None,
 ):
     iterable = None
     if isinstance(response_data, str):
@@ -45,7 +48,22 @@ def find_error(
 
     if iterable is not None:
         for value in iterable:
-            rv = find_error(value, code=code, message=message, matcher=matcher)
+            rv = _find_error(value, code=code, message=message, matcher=matcher)
             if rv:
                 return rv
-    return None
+    else:
+        raise TypeError('Can not find_error in %r' % response_data)
+
+
+def find_error(
+    response_data: Union[str, dict, list],
+    *,
+    code: Optional[StringOrPattern] = None,
+    message: Optional[StringOrPattern] = None,
+    matcher: Optional[Callable] = None,
+):
+    kwargs = dict(code=code, message=message, matcher=matcher)
+    err = _find_error(response_data, **kwargs)
+    if err:
+        return err
+    raise AssertionError('Could not find error matching %r in %r' % (kwargs, response_data))

@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-
 # From http://hetland.org/coding/python/levenshtein.py, which is in the public domain.
 
 
-def levenshtein(a, b):
+def levenshtein(a: str, b: str) -> int:
     "Calculates the Levenshtein distance between a and b."
     n, m = len(a), len(b)
     if n > m:

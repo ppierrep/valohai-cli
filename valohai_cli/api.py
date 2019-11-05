@@ -1,9 +1,11 @@
 import platform
+from typing import Optional, Tuple
 
 import click
 import requests
 import six
 from requests.auth import AuthBase
+from requests.models import PreparedRequest, Request, Response
 from six.moves.urllib_parse import urljoin, urlparse
 
 from valohai_cli import __version__ as VERSION
@@ -14,12 +16,12 @@ from valohai_cli.utils import force_text
 
 class TokenAuth(AuthBase):
 
-    def __init__(self, netloc, token):
+    def __init__(self, netloc: str, token: Optional[str]) -> None:
         super(TokenAuth, self).__init__()
         self.netloc = netloc
         self.token = token
 
-    def __call__(self, request):
+    def __call__(self, request: PreparedRequest) -> PreparedRequest:
         if not request.headers.get('Authorization') and urlparse(request.url).netloc == self.netloc:
             if self.token:
                 request.headers['Authorization'] = 'Token %s' % self.token
@@ -28,7 +30,7 @@ class TokenAuth(AuthBase):
 
 class APISession(requests.Session):
 
-    def __init__(self, base_url, token=None):
+    def __init__(self, base_url: str, token: Optional[str] = None) -> None:
         super(APISession, self).__init__()
         self.base_url = base_url
         self.base_netloc = urlparse(self.base_url).netloc
@@ -40,13 +42,13 @@ class APISession(requests.Session):
             py_version='%s %s' % (platform.python_implementation(), platform.python_version()),
         )
 
-    def prepare_request(self, request):
+    def prepare_request(self, request: Request) -> PreparedRequest:
         url_netloc = urlparse(request.url).netloc
         if not url_netloc:
             request.url = urljoin(self.base_url, request.url)
         return super(APISession, self).prepare_request(request)
 
-    def request(self, method, url, **kwargs):
+    def request(self, method: str, url: str, **kwargs) -> Response:
         api_error_class = kwargs.pop('api_error_class', APIError)
         handle_errors = bool(kwargs.pop('handle_errors', True))
         try:
@@ -65,7 +67,7 @@ class APISession(requests.Session):
         return resp
 
 
-def _get_current_api_session():
+def _get_current_api_session() -> APISession:
     """
     Get an API session, either from the Click context cache, or a new one from the config.
 
@@ -83,7 +85,7 @@ def _get_current_api_session():
     return session
 
 
-def get_host_and_token():
+def get_host_and_token() -> Tuple[str, str]:
     host = settings.host
     token = settings.token
     if not (host and token):
@@ -91,7 +93,7 @@ def get_host_and_token():
     return (host, token)
 
 
-def request(method, url, **kwargs):
+def request(method: str, url: str, **kwargs) -> Response:
     """
     Make an authenticated API request.
 
@@ -100,8 +102,6 @@ def request(method, url, **kwargs):
     :param method: HTTP Method
     :param url: URL
     :param kwargs: Other kwargs, see `APISession.request()`
-    :return: requests.Response
-    :rtype: requests.Response
     """
     session = _get_current_api_session()
     if url.startswith(session.base_url):

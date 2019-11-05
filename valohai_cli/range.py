@@ -1,14 +1,20 @@
+from typing import Iterable, Set, Union
+
 import six
 from six.moves import xrange as range
 
 
 class IntegerRange:
-    def __init__(self, includes, excludes):
+    def __init__(
+        self,
+        includes: Iterable[Iterable[int]],
+        excludes: Iterable[Iterable[int]],
+    ) -> None:
         self.includes = set(includes)
         self.excludes = set(excludes)
 
     @classmethod
-    def parse(cls, atoms):
+    def parse(cls, atoms: Iterable[Union[str, int]]) -> 'IntegerRange':
         includes = set()
         excludes = set()
         for atom in atoms:
@@ -33,7 +39,7 @@ class IntegerRange:
             raise ValueError('Not a valid range atom: %s' % atom)  # pragma: no cover
         return cls(includes=includes, excludes=excludes)
 
-    def as_set(self):
+    def as_set(self) -> Set[int]:
         values = set()
         for inc in self.includes:
             values |= set(inc)

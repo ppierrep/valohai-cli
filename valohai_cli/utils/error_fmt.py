@@ -1,3 +1,5 @@
+from typing import Any
+
 import click
 
 
@@ -5,15 +7,15 @@ class ErrorFormatter:
     indent = '  '
     generic_dict_keys = ['non_field_errors', 'detail', 'error']
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.buffer = []
         self.level = 0
 
-    def write(self, prefix, line):
+    def write(self, prefix: str, line: str) -> None:
         indent_str = self.indent * self.level
         self.buffer.append("{}{}{}".format(indent_str, prefix, line))
 
-    def format(self, data, indent=0, prefix=''):
+    def format(self, data: Any, indent: int = 0, prefix: str = '') -> None:
         self.level += indent
         if isinstance(data, dict):
             if data.get('message'):
@@ -34,7 +36,7 @@ class ErrorFormatter:
             self.write(prefix, data)
         self.level -= indent
 
-    def _format_dict(self, data, prefix):
+    def _format_dict(self, data: dict, prefix: str) -> None:
         data = data.copy()
         # Peel off our generic keys first
         for key in self.generic_dict_keys:
@@ -50,7 +52,7 @@ class ErrorFormatter:
                 self.format(value, indent=1)
 
 
-def format_error_data(data):
+def format_error_data(data: dict) -> str:
     ef = ErrorFormatter()
     ef.format(data)
     return '\n'.join(ef.buffer)

@@ -1,19 +1,21 @@
 from pprint import pformat
+from typing import Any, IO, List, Optional
 
 import click
 from click import ClickException
+from requests.models import Response
 
 
 class CLIException(ClickException):
     kind = 'Error'
     color = 'red'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         kind = kwargs.pop('kind', None)
         super(CLIException, self).__init__(*args, **kwargs)
         self.kind = (kind or self.kind)
 
-    def show(self, file=None):
+    def show(self, file: Optional[IO] = None) -> None:
         formatted_message = self.format_message()
         if '\n' in formatted_message:
             # If there are newlines in the message, we'll format things a little differently.
@@ -31,14 +33,14 @@ class CLIException(ClickException):
             for hint in hints:
                 click.echo('* {}'.format(hint), err=True)
 
-    def get_hints(self):
+    def get_hints(self) -> List[str]:
         return []
 
 
 class APIError(CLIException):
     kind = 'API Error'
 
-    def __init__(self, response):
+    def __init__(self, response: Response) -> None:
         """
         :type response: requests.Response
         """
@@ -51,7 +53,7 @@ class APIError(CLIException):
         self.response = response
         self.request = response.request
 
-    def format_message(self):
+    def format_message(self) -> str:
         try:
             error_json = self.response.json()
             if isinstance(error_json, (dict, list)):
@@ -95,7 +97,7 @@ class PackageTooLarge(CLIException):
 class NoGitRepo(CLIException):
     color = 'yellow'
 
-    def __init__(self, directory):
+    def __init__(self, directory: str) -> None:
         self.directory = directory
         super(NoGitRepo, self).__init__('{} is not a Git repository'.format(directory))
 
@@ -103,6 +105,6 @@ class NoGitRepo(CLIException):
 class NoCommit(ValueError, CLIException):
     color = 'yellow'
 
-    def __init__(self, directory):
+    def __init__(self, directory: str) -> None:
         self.directory = directory
         super(NoCommit, self).__init__('{} has no commits'.format(directory))

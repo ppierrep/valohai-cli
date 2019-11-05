@@ -1,5 +1,6 @@
 import math
 import time
+from typing import Dict, Optional, Union
 
 import click
 
@@ -16,7 +17,7 @@ class Divider(LayoutElement):
     Full-width divider.
     """
 
-    def __init__(self, ch='#', style=None):
+    def __init__(self, ch: str = '#', style: Optional[dict] = None):
         """
         :param ch: The character (or characters) to fill the line with
         :type ch: str
@@ -25,7 +26,7 @@ class Divider(LayoutElement):
         self.ch = force_text(ch)
         self.style = (style or {})
 
-    def draw(self):
+    def draw(self) -> None:
         chs = (self.ch * int(math.ceil(self.layout.width / len(self.ch))))[:self.layout.width]
         click.echo(click.style(chs, **self.style))
 
@@ -40,11 +41,11 @@ class Flex(LayoutElement):
         'center': lambda content, width: content.center(width),
     }
 
-    def __init__(self, style=None):
+    def __init__(self, style: Optional[Dict[str, str]] = None):
         self.cells = []
         self.style = (style or {})
 
-    def add(self, content, flex=1, style=None, align='left'):
+    def add(self, content: str, flex: int = 1, style: Optional[Union[Dict[str, Union[str, bool]], Dict[str, bool]]] = None, align: str = 'left') -> 'Flex':
         """
         Add a content column to the flex.
 
@@ -67,7 +68,7 @@ class Flex(LayoutElement):
         })
         return self
 
-    def draw(self):
+    def draw(self) -> None:
         if not self.cells:
             return
         total_flex = sum(cell['flex'] for cell in self.cells)
@@ -96,11 +97,11 @@ class Layout:
     Row-oriented layout.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.rows = []
         self.width, self.height = click.get_terminal_size()
 
-    def add(self, element):
+    def add(self, element: Union[Flex, Divider]) -> 'Layout':
         """
         Add a LayoutElement to the Layout.
 
@@ -114,7 +115,7 @@ class Layout:
         self.rows.append(element)
         return self
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draw the Layout onto screen.
         """
@@ -123,5 +124,5 @@ class Layout:
             element.draw()
 
 
-def get_spinner_character():
+def get_spinner_character() -> str:
     return '|/-\\'[int(time.time() * 3) % 4]

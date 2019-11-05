@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Optional
 
 import click
 
@@ -9,6 +10,7 @@ from valohai_cli.commands.project.link import link
 from valohai_cli.ctx import get_project
 from valohai_cli.exceptions import NotLoggedIn
 from valohai_cli.messages import error, warn
+from valohai_cli.models.project import Project
 from valohai_cli.utils import get_project_directory
 from valohai_cli.yaml_wizard import yaml_wizard
 
@@ -77,7 +79,7 @@ def init():
     click.secho('*' * width, fg='green', bold=True)
 
 
-def link_or_create_prompt(cwd):
+def link_or_create_prompt(directory: str) -> Optional[Project]:
     while True:
         response = click.prompt(
             'Do you want to link this directory to a pre-existing project, or create a new one? [L/C]\n'
@@ -96,7 +98,7 @@ def link_or_create_prompt(cwd):
         else:
             warn('Sorry, I couldn\'t understand that.')
             continue
-        project = get_project(cwd)
+        project = get_project(directory)
         if not project:
             error('Oops, looks like something went wrong.')
             sys.exit(2)
